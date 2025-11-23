@@ -8,26 +8,32 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'professor') {
     exit;
 }
 
-// Fetch courses assigned to this professor
+// Fetch professor’s assigned courses
 $stmt = $pdo->prepare("SELECT * FROM courses WHERE instructor_id = ?");
 $stmt->execute([$_SESSION['user_id']]);
 $courses = $stmt->fetchAll();
 
-// Prepare data for each course
+// Prepare rating + comment data
 $courseData = [];
 foreach ($courses as $c) {
-    $stmt = $pdo->prepare("SELECT AVG(rating_overall) AS avg_overall,
-                                  AVG(rating_teaching) AS avg_teaching,
-                                  AVG(rating_material) AS avg_material
-                           FROM feedback WHERE course_id = ?");
+
+    // Average ratings
+    $stmt = $pdo->prepare("
+        SELECT AVG(rating_overall) AS avg_overall,
+               AVG(rating_teaching) AS avg_teaching,
+               AVG(rating_material) AS avg_material
+        FROM feedback WHERE course_id = ?
+    ");
     $stmt->execute([$c['id']]);
     $ratings = $stmt->fetch();
 
+    // Comments
     $stmt = $pdo->prepare("SELECT comment FROM feedback WHERE course_id = ?");
     $stmt->execute([$c['id']]);
     $comments = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
     $courseData[] = [
+        'id' => $c['id'],
         'name' => $c['name'],
         'avg_overall' => $ratings['avg_overall'],
         'avg_teaching' => $ratings['avg_teaching'],
@@ -41,56 +47,138 @@ foreach ($courses as $c) {
 <head>
     <meta charset="UTF-8">
     <title>Professor Dashboard</title>
+
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/style.css">
 </head>
-<body class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Welcome, <?php echo htmlspecialchars($_SESSION['name']); ?> (Professor)</h2>
-        <a href="../includes/logout.php" class="btn btn-secondary">Logout</a>
-    </div>
+
+<body>
+
+<!-- =======================
+     SIDEBAR MENU
+======================= -->
+<div id="sidebar" class="sidebar">
+    <h3 class="sidebar-title">Professor Panel</h3>
+
+    <a href="professor_dashboard.php" class="sidebar-link">
+        <i class="bi bi-graph-up"></i> Analytics
+    </a>
+
+    <a href="../includes/logout.php" class="sidebar-link logout">
+        <i class="bi bi-box-arrow-right"></i> Logout
+    </a>
+</div>
+
+<!-- Toggle Button -->
+<button id="toggle-btn" class="toggle-btn">
+    <i class="bi bi-list"></i>
+</button>
+
+<!-- =======================
+     MAIN CONTENT
+======================= -->
+
+<div class="container mt-5">
+
+    <h2 class="section-title mb-4">
+        <i class="bi bi-person-badge text-primary"></i>
+        Welcome, <?php echo htmlspecialchars($_SESSION['name']); ?> (Professor)
+    </h2>
 
     <?php if (empty($courseData)): ?>
-        <div class="alert alert-info">No courses assigned to you yet.</div>
+        <div class="alert alert-info shadow-sm">
+            No courses assigned to you yet.
+        </div>
     <?php else: ?>
+
         <?php foreach ($courseData as $c): ?>
-            <div class="card mb-4">
+            <div class="card shadow-sm mb-5">
+
                 <div class="card-header bg-primary text-white">
+                    <i class="bi bi-book-half"></i>
                     <?php echo htmlspecialchars($c['name']); ?>
                 </div>
+
                 <div class="card-body">
-                    <canvas id="chart_<?php echo md5($c['name']); ?>" height="100"></canvas>
+
+                    <!-- Chart Heading -->
+                    <h5 class="mb-3 fw-bold">Course Ratings Overview</h5>
+
+                    <canvas id="chart_<?php echo md5($c['id']); ?>" height="110"></canvas>
+
                     <script>
-                        const ctx_<?php echo md5($c['name']); ?> = document.getElementById("chart_<?php echo md5($c['name']); ?>");
-                        new Chart(ctx_<?php echo md5($c['name']); ?>, {
+                        new Chart(document.getElementById("chart_<?php echo md5($c['id']); ?>"), {
                             type: 'bar',
                             data: {
-                                labels: ['Overall', 'Teaching', 'Material'],
+                                labels: ['Overall', 'Teaching', 'Materials'],
                                 datasets: [{
-                                    label: 'Average Ratings',
-                                    data: [<?php echo round($c['avg_overall'] ?? 0, 2); ?>,
-                                           <?php echo round($c['avg_teaching'] ?? 0, 2); ?>,
-                                           <?php echo round($c['avg_material'] ?? 0, 2); ?>],
-                                    backgroundColor: ['#0d6efd','#198754','#ffc107']
+                                    label: 'Average Rating',
+                                    data: [
+                                        <?php echo round($c['avg_overall'] ?? 0, 2); ?>,
+                                        <?php echo round($c['avg_teaching'] ?? 0, 2); ?>,
+                                        <?php echo round($c['avg_material'] ?? 0, 2); ?>
+                                    ],
+                                    backgroundColor: ['#0d6efd','#198754','#ffc107'],
+                                    borderRadius: 6
                                 }]
                             },
-                            options: {scales: {y: {beginAtZero:true,max:5}}}
+                            options: {
+                                scales: { y: { beginAtZero: true, max: 5 } },
+                                responsive: true,
+                                animation: {
+                                    duration: 1200,
+                                    easing: 'easeOutQuart'
+                                }
+                            }
                         });
                     </script>
 
-                    <h5 class="mt-4">Student Comments</h5>
+                    <!-- Comments Section -->
+                    <h5 class="mt-4 fw-bold">Student Comments</h5>
+
                     <?php if (empty($c['comments'])): ?>
-                        <div class="alert alert-info">No comments yet.</div>
+                        <div class="alert alert-secondary">
+                            <i class="bi bi-chat-left-dots"></i> No comments yet.
+                        </div>
                     <?php else: ?>
-                        <ul class="list-group">
+
+                        <ul class="list-group shadow-sm">
                             <?php foreach ($c['comments'] as $comment): ?>
-                                <li class="list-group-item"><?php echo htmlspecialchars($comment); ?></li>
+                                <li class="list-group-item">
+                                    <i class="bi bi-chat-quote text-primary me-2"></i>
+                                    <?php echo htmlspecialchars($comment); ?>
+                                </li>
                             <?php endforeach; ?>
                         </ul>
+
                     <?php endif; ?>
                 </div>
             </div>
         <?php endforeach; ?>
+
     <?php endif; ?>
+
+</div>
+
+<!-- Sidebar JS -->
+<script>
+    const sidebar = document.getElementById('sidebar');
+    const toggleBtn = document.getElementById('toggle-btn');
+
+    toggleBtn.onclick = function () {
+        sidebar.classList.toggle('show');
+        document.body.classList.toggle('body-shift');
+    };
+</script>
+
 </body>
 </html>

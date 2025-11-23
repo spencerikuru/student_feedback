@@ -1,0 +1,221 @@
+/* ============================
+   GLOBAL STYLING
+   ============================ */
+body {
+    font-family: 'Poppins', sans-serif !important;
+    background-color: #f5f7fa;
+    color: #333;
+}
+
+/* Smooth fade-in animation for all pages */
+body {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+/* ============================
+   NAVBAR
+   ============================ */
+.navbar {
+    border-radius: 0 0 12px 12px;
+    padding: 12px 20px;
+}
+
+.navbar-brand {
+    font-size: 1.4rem;
+    letter-spacing: 0.5px;
+}
+
+/* ============================
+   CARDS
+   ============================ */
+.card {
+    border-radius: 12px !important;
+    border: none !important;
+    background: #ffffff;
+}
+
+.card-header {
+    border-radius: 12px 12px 0 0 !important;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.card-body {
+    font-size: 0.95rem;
+}
+
+/* ============================
+   BUTTONS
+   ============================ */
+.btn {
+    border-radius: 8px !important;
+    padding: 8px 14px;
+    font-weight: 500;
+}
+
+.btn-success {
+    background-color: #28a745 !important;
+}
+ N   
+.btn-primary {
+    background-color: #0d6efd !important;
+}
+
+/* Hover effects */
+.btn:hover {
+    opacity: 0.9;
+    transform: scale(1.02);
+    transition: 0.2s;
+}
+
+/* ============================
+   FORMS
+   ============================ */
+input.form-control,
+textarea.form-control {
+    border-radius: 8px !important;
+    border: 1px solid #ced4da !important;
+    padding: 10px;
+}
+
+/* Remove textarea resize */
+textarea {
+    resize: none;
+}
+
+/* Form label styling */
+.form-label {
+    font-weight: 600;
+    color: #444;
+}
+
+/* ============================
+   TABLES
+   ============================ */
+.table thead {
+    background-color: #e3e6ea;
+    font-weight: bold;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f2f4f8;
+}
+
+/* ============================
+   LOGIN PAGE
+   ============================ */
+.login-bg {
+    background: linear-gradient(135deg, #4e73df, #1cc88a);
+    height: 100vh;
+}
+
+.login-card {
+    width: 380px;
+    background: white;
+    border-radius: 14px;
+    animation: fadeInUp 0.7s ease-in-out;
+}
+
+@keyframes fadeInUp {
+    from {opacity: 0; transform: translateY(20px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+
+/* ============================
+   HEADERS & TITLES
+   ============================ */
+h1, h2, h3, h4, h5 {
+    font-weight: 600 !important;
+}
+
+/* Page section title */
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #4e73df;
+    margin-bottom: 20px;
+}
+
+/* ============================
+   SPACING UTILITIES
+   ============================ */
+.mt-6 { margin-top: 4rem; }
+.mb-6 { margin-bottom: 4rem; }
+
+/* ============================
+   SIDEBAR MENU
+   ============================ */
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 230px;
+    height: 100vh;
+    background: #0d6efd;
+    padding: 20px;
+    color: white;
+    transform: translateX(-100%);
+    transition: 0.3s ease-in-out;
+    z-index: 1000;
+}
+
+.sidebar.show {
+    transform: translateX(0);
+}
+
+.sidebar-title {
+    font-size: 1.4rem;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.sidebar-link {
+    display: block;
+    color: white;
+    text-decoration: none;
+    font-size: 1.1rem;
+    margin: 15px 0;
+    padding: 10px;
+    border-radius: 8px;
+    transition: 0.2s;
+}
+
+.sidebar-link:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-link.logout {
+    margin-top: 30px;
+    color: #ffdddd;
+}
+
+/* TOGGLE BUTTON */
+.toggle-btn {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    border: none;
+    background: #0d6efd;
+    color: white;
+    padding: 10px 14px;
+    border-radius: 8px;
+    z-index: 1100;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+.toggle-btn:hover {
+    background: #0b5ed7;
+}
+
+/* Add margin-left when sidebar opens */
+.body-shift {
+    margin-left: 230px;
+    transition: 0.3s;
+}
