@@ -10,41 +10,37 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'student') {
 
 $message = "";
 
-// If form submitted
+// If student submits feedback
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['course_id'])) {
+
     $courseId = intval($_POST['course_id']);
     $ratingOverall = intval($_POST['rating_overall']);
     $ratingTeaching = intval($_POST['rating_teaching']);
     $ratingMaterial = intval($_POST['rating_material']);
     $comment = trim($_POST['comment']);
 
-    // Prevent duplicate submissions
-    $token = $_SESSION['user_id'] . '-' . $courseId;
-    $tokenHash = hash('sha256', $token);
+    // Fetch deadline
+    $stmt = $pdo->prepare("SELECT deadline FROM courses WHERE id = ?");
+    $stmt->execute([$courseId]);
+    $deadline = $stmt->fetchColumn();
 
-    $stmt = $pdo->prepare("SELECT id FROM submission_tokens WHERE token_hash=? AND course_id=?");
-    $stmt->execute([$tokenHash, $courseId]);
-    $alreadySubmitted = $stmt->fetch();
-
-    if ($alreadySubmitted) {
-        $message = ["⚠️ You already submitted feedback for this course.", "warning"];
+    // Check if deadline exists AND is past
+    if ($deadline && strtotime($deadline) < time()) {
+        $message = ["⚠️ Deadline has passed. You cannot submit feedback.", "danger"];
     } else {
-        // Insert feedback
-        $stmt = $pdo->prepare("INSERT INTO feedback 
-            (course_id, rating_overall, rating_teaching, rating_material, comment)
-            VALUES (?, ?, ?, ?, ?)");
+        // Insert feedback (multiple submissions allowed)
+        $stmt = $pdo->prepare("
+            INSERT INTO feedback (course_id, rating_overall, rating_teaching, rating_material, comment)
+            VALUES (?, ?, ?, ?, ?)
+        ");
         $stmt->execute([$courseId, $ratingOverall, $ratingTeaching, $ratingMaterial, $comment]);
-
-        // Save token
-        $stmt = $pdo->prepare("INSERT INTO submission_tokens (course_id, token_hash) VALUES (?, ?)");
-        $stmt->execute([$courseId, $tokenHash]);
 
         $message = ["✅ Feedback submitted successfully!", "success"];
     }
 }
 
-// Fetch all courses
-$stmt = $pdo->query("SELECT * FROM courses ORDER BY created_at DESC");
+// Fetch courses with deadline included
+$stmt = $pdo->query("SELECT id, name, code, created_at, deadline FROM courses ORDER BY created_at DESC");
 $courses = $stmt->fetchAll();
 ?>
 
@@ -70,10 +66,10 @@ $courses = $stmt->fetchAll();
      SIDEBAR MENU
 ======================= -->
 <div id="sidebar" class="sidebar">
-    <h3 class="sidebar-title">Student Panel</h3>
+    <h3 class="sidebar-title">Student</h3>
 
     <a href="student_dashboard.php" class="sidebar-link">
-        <i class="bi bi-journal-text"></i> My Courses
+        <i class="bi bi-book"></i> Courses
     </a>
 
     <a href="../includes/logout.php" class="sidebar-link logout">
@@ -91,8 +87,8 @@ $courses = $stmt->fetchAll();
 ======================= -->
 <div class="container mt-5">
 
-    <h2 class="mb-4 section-title">
-        <i class="bi bi-person-check text-success"></i>
+    <h2 class="mb-4">
+        <i class="bi bi-book text-success"></i>
         Welcome, <?php echo htmlspecialchars($_SESSION['name']); ?>
     </h2>
 
@@ -105,15 +101,40 @@ $courses = $stmt->fetchAll();
 
     <h4 class="mb-4">Available Courses</h4>
 
-    <!-- Course Cards -->
+    <!-- Courses -->
     <?php foreach ($courses as $course): ?>
         <div class="card shadow-sm p-4 mb-4">
 
-            <h4 class="text-success mb-1">
+            <h4 class="text-success">
                 <?php echo htmlspecialchars($course['name']); ?>
             </h4>
             <p class="text-muted small">(<?php echo htmlspecialchars($course['code']); ?>)</p>
 
+            <!-- Show deadline -->
+            <p class="text-danger small fw-bold">
+                <i class="bi bi-clock-history"></i>
+                Deadline:
+                <?php echo $course['deadline'] ? $course['deadline'] : 'No deadline set'; ?>
+            </p>
+
+            <!-- Modern Rating Scale Box -->
+            <div class="rating-scale-box p-3 mb-3 rounded shadow-sm"
+                style="background:#f8f9fa; border-left:5px solid #0d6efd;">
+
+                <div class="fw-bold text-primary mb-1">
+                    <i class="bi bi-stars"></i> Rating Scale
+                </div>
+
+                <div class="d-flex justify-content-between text-center">
+                    <span class="small">1<br><span class="text-muted">Poor</span></span>
+                    <span class="small">2<br><span class="text-muted">Fair</span></span>
+                    <span class="small">3<br><span class="text-muted">Good</span></span>
+                    <span class="small">4<br><span class="text-muted">Very Good</span></span>
+                    <span class="small">5<br><span class="text-muted">Excellent</span></span>
+                </div>
+            </div>
+
+            <!-- Feedback Form -->
             <form method="post">
                 <input type="hidden" name="course_id" value="<?php echo $course['id']; ?>">
 
@@ -122,10 +143,12 @@ $courses = $stmt->fetchAll();
                         <label class="form-label">Overall Rating</label>
                         <input type="number" name="rating_overall" min="1" max="5" class="form-control" required>
                     </div>
+
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Teaching Rating</label>
                         <input type="number" name="rating_teaching" min="1" max="5" class="form-control" required>
                     </div>
+
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Materials Rating</label>
                         <input type="number" name="rating_material" min="1" max="5" class="form-control" required>
@@ -147,7 +170,7 @@ $courses = $stmt->fetchAll();
 
 </div>
 
-<!-- Sidebar JavaScript -->
+<!-- Sidebar JS -->
 <script>
     const sidebar = document.getElementById('sidebar');
     const toggleBtn = document.getElementById('toggle-btn');
@@ -157,6 +180,10 @@ $courses = $stmt->fetchAll();
         document.body.classList.toggle('body-shift');
     };
 </script>
+
+
+
+Rewrite this whole code and send it back to me exactly
 
 </body>
 </html>

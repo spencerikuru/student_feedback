@@ -8,16 +8,16 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'professor') {
     exit;
 }
 
-// Fetch professor’s assigned courses
+// Fetch courses assigned to this professor
 $stmt = $pdo->prepare("SELECT * FROM courses WHERE instructor_id = ?");
 $stmt->execute([$_SESSION['user_id']]);
 $courses = $stmt->fetchAll();
 
-// Prepare rating + comment data
+// Prepare course rating + comment data
 $courseData = [];
 foreach ($courses as $c) {
 
-    // Average ratings
+    // Fetch average ratings
     $stmt = $pdo->prepare("
         SELECT AVG(rating_overall) AS avg_overall,
                AVG(rating_teaching) AS avg_teaching,
@@ -27,7 +27,7 @@ foreach ($courses as $c) {
     $stmt->execute([$c['id']]);
     $ratings = $stmt->fetch();
 
-    // Comments
+    // Fetch comments
     $stmt = $pdo->prepare("SELECT comment FROM feedback WHERE course_id = ?");
     $stmt->execute([$c['id']]);
     $comments = $stmt->fetchAll(PDO::FETCH_COLUMN);
@@ -54,10 +54,10 @@ foreach ($courses as $c) {
     <!-- Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
-    <!-- Chart.js -->
+    <!-- Charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- Custom CSS -->
+    <!-- Custom Styles -->
     <link rel="stylesheet" href="assets/style.css">
 </head>
 
@@ -67,7 +67,7 @@ foreach ($courses as $c) {
      SIDEBAR MENU
 ======================= -->
 <div id="sidebar" class="sidebar">
-    <h3 class="sidebar-title">Professor Panel</h3>
+    <h3 class="sidebar-title">Professor</h3>
 
     <a href="professor_dashboard.php" class="sidebar-link">
         <i class="bi bi-graph-up"></i> Analytics
@@ -78,7 +78,7 @@ foreach ($courses as $c) {
     </a>
 </div>
 
-<!-- Toggle Button -->
+<!-- Sidebar Toggle -->
 <button id="toggle-btn" class="toggle-btn">
     <i class="bi bi-list"></i>
 </button>
@@ -86,18 +86,16 @@ foreach ($courses as $c) {
 <!-- =======================
      MAIN CONTENT
 ======================= -->
-
 <div class="container mt-5">
 
-    <h2 class="section-title mb-4">
+    <h2 class="mb-4">
         <i class="bi bi-person-badge text-primary"></i>
         Welcome, <?php echo htmlspecialchars($_SESSION['name']); ?> (Professor)
     </h2>
 
     <?php if (empty($courseData)): ?>
-        <div class="alert alert-info shadow-sm">
-            No courses assigned to you yet.
-        </div>
+        <div class="alert alert-info">No courses assigned to you yet.</div>
+
     <?php else: ?>
 
         <?php foreach ($courseData as $c): ?>
@@ -110,10 +108,46 @@ foreach ($courses as $c) {
 
                 <div class="card-body">
 
-                    <!-- Chart Heading -->
-                    <h5 class="mb-3 fw-bold">Course Ratings Overview</h5>
+                    <!-- =====================
+                        AVERAGE RATINGS SUMMARY
+                    ====================== -->
+                    <div class="mb-4 p-3 rounded shadow-sm"
+                        style="background:#f8f9fa; border-left:5px solid #198754;">
 
-                    <canvas id="chart_<?php echo md5($c['id']); ?>" height="110"></canvas>
+                        <div class="fw-bold text-success mb-2">
+                            <i class="bi bi-bar-chart-line"></i> Average Ratings
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <span class="small fw-bold">Overall:</span>
+                                <span class="badge bg-primary">
+                                    <?php echo round($c['avg_overall'] ?? 0, 2); ?>
+                                </span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <span class="small fw-bold">Teaching:</span>
+                                <span class="badge bg-success">
+                                    <?php echo round($c['avg_teaching'] ?? 0, 2); ?>
+                                </span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <span class="small fw-bold">Materials:</span>
+                                <span class="badge bg-warning text-dark">
+                                    <?php echo round($c['avg_material'] ?? 0, 2); ?>
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- =====================
+                        CHART DISPLAY
+                    ====================== -->
+                    <h5 class="mb-3">Course Ratings Overview</h5>
+                    <canvas id="chart_<?php echo md5($c['id']); ?>" height="100"></canvas>
 
                     <script>
                         new Chart(document.getElementById("chart_<?php echo md5($c['id']); ?>"), {
@@ -128,30 +162,28 @@ foreach ($courses as $c) {
                                         <?php echo round($c['avg_material'] ?? 0, 2); ?>
                                     ],
                                     backgroundColor: ['#0d6efd','#198754','#ffc107'],
-                                    borderRadius: 6
                                 }]
                             },
                             options: {
                                 scales: { y: { beginAtZero: true, max: 5 } },
                                 responsive: true,
-                                animation: {
-                                    duration: 1200,
-                                    easing: 'easeOutQuart'
-                                }
+                                animation: { duration: 900 }
                             }
                         });
                     </script>
 
-                    <!-- Comments Section -->
-                    <h5 class="mt-4 fw-bold">Student Comments</h5>
+                    <!-- =====================
+                        COMMENTS SECTION
+                    ====================== -->
+                    <h5 class="mt-4">Student Comments</h5>
 
                     <?php if (empty($c['comments'])): ?>
                         <div class="alert alert-secondary">
                             <i class="bi bi-chat-left-dots"></i> No comments yet.
                         </div>
-                    <?php else: ?>
 
-                        <ul class="list-group shadow-sm">
+                    <?php else: ?>
+                        <ul class="list-group">
                             <?php foreach ($c['comments'] as $comment): ?>
                                 <li class="list-group-item">
                                     <i class="bi bi-chat-quote text-primary me-2"></i>
@@ -159,8 +191,8 @@ foreach ($courses as $c) {
                                 </li>
                             <?php endforeach; ?>
                         </ul>
-
                     <?php endif; ?>
+
                 </div>
             </div>
         <?php endforeach; ?>
@@ -169,7 +201,7 @@ foreach ($courses as $c) {
 
 </div>
 
-<!-- Sidebar JS -->
+<!-- SIDEBAR JS -->
 <script>
     const sidebar = document.getElementById('sidebar');
     const toggleBtn = document.getElementById('toggle-btn');
