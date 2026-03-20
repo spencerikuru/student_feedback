@@ -57,7 +57,7 @@ $courses = $stmt->fetchAll();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/style.css?v=2">
 </head>
 
 <body>
@@ -66,14 +66,22 @@ $courses = $stmt->fetchAll();
      SIDEBAR MENU
 ======================= -->
 <div id="sidebar" class="sidebar">
-    <h3 class="sidebar-title">Student</h3>
+    <div class="sidebar-brand">
+        <div class="sidebar-brand-icon">
+            <i class="bi bi-mortarboard-fill"></i>
+        </div>
+        <div class="sidebar-brand-text">
+            <h3 class="sidebar-title mb-0">Student</h3>
+            <p class="sidebar-subtitle mb-0">Feedback Portal</p>
+        </div>
+    </div>
 
-    <a href="student_dashboard.php" class="sidebar-link">
-        <i class="bi bi-book"></i> Courses
+    <a href="student_dashboard.php" class="sidebar-link active">
+        <i class="bi bi-book"></i><span>Courses</span>
     </a>
 
     <a href="../includes/logout.php" class="sidebar-link logout">
-        <i class="bi bi-box-arrow-right"></i> Logout
+        <i class="bi bi-box-arrow-right"></i><span>Logout</span>
     </a>
 </div>
 
@@ -85,52 +93,87 @@ $courses = $stmt->fetchAll();
 <!-- =======================
      MAIN CONTENT
 ======================= -->
-<div class="container mt-5">
+<div class="container-fluid main-content">
 
-    <h2 class="mb-4">
-        <i class="bi bi-book text-success"></i>
-        Welcome, <?php echo htmlspecialchars($_SESSION['name']); ?>
-    </h2>
+    <div class="dashboard-hero mb-4">
+        <div class="dashboard-hero-content">
+            <div>
+                <span class="hero-badge">Student Workspace</span>
+                <h2 class="hero-title mt-3 mb-2">
+                    Welcome, <?php echo htmlspecialchars($_SESSION['name']); ?>
+                </h2>
+                <p class="hero-subtitle mb-0">
+                    Submit course evaluations and help improve teaching quality through structured feedback.
+                </p>
+            </div>
+            <div class="hero-icon">
+                <i class="bi bi-stars"></i>
+            </div>
+        </div>
+    </div>
 
     <!-- Message -->
     <?php if (!empty($message)): ?>
-        <div class="alert alert-<?php echo $message[1]; ?>">
+        <div class="alert alert-<?php echo $message[1]; ?> modern-alert">
             <?php echo htmlspecialchars($message[0]); ?>
         </div>
     <?php endif; ?>
 
-    <h4 class="mb-4">Available Courses</h4>
+    <div class="section-head mb-4">
+        <div>
+            <h4 class="mb-1">Available Courses</h4>
+            <p class="section-subtext mb-0">Select a course below and complete the evaluation form.</p>
+        </div>
+        <span class="section-chip">Live Evaluation</span>
+    </div>
 
     <!-- Courses -->
     <?php foreach ($courses as $course): ?>
-        <div class="card shadow-sm p-4 mb-4">
+        <div class="card course-card p-4 mb-4">
 
-            <h4 class="text-success">
-                <?php echo htmlspecialchars($course['name']); ?>
-            </h4>
-            <p class="text-muted small">(<?php echo htmlspecialchars($course['code']); ?>)</p>
+            <div class="course-card-header mb-3">
+                <div>
+                    <h4 class="course-title">
+                        <?php echo htmlspecialchars($course['name']); ?>
+                    </h4>
+                    <p class="course-code mb-0">(<?php echo htmlspecialchars($course['code']); ?>)</p>
+                </div>
 
-            <!-- Show deadline -->
-            <p class="text-danger small fw-bold">
-                <i class="bi bi-clock-history"></i>
-                Deadline:
-                <?php echo $course['deadline'] ? $course['deadline'] : 'No deadline set'; ?>
-            </p>
+                <div class="deadline-pill">
+                    <i class="bi bi-clock-history"></i>
+                    <span>
+                        <?php echo $course['deadline'] ? 'Deadline: ' . htmlspecialchars($course['deadline']) : 'No deadline set'; ?>
+                    </span>
+                </div>
+            </div>
 
             <!-- Modern Rating Scale Box -->
-            <div class="rating-scale-box p-3 mb-3 rounded shadow-sm"
-                style="background:#f8f9fa; border-left:5px solid #0d6efd;">
-
-                <div class="fw-bold text-primary mb-1">
+            <div class="rating-scale-box p-3 mb-4">
+                <div class="rating-scale-title">
                     <i class="bi bi-stars"></i> Rating Scale
                 </div>
 
-                <div class="d-flex justify-content-between text-center">
-                    <span class="small">1<br><span class="text-muted">Poor</span></span>
-                    <span class="small">2<br><span class="text-muted">Fair</span></span>
-                    <span class="small">3<br><span class="text-muted">Good</span></span>
-                    <span class="small">4<br><span class="text-muted">Very Good</span></span>
-                    <span class="small">5<br><span class="text-muted">Excellent</span></span>
+                <div class="rating-scale-grid">
+                    <div class="rating-item">
+                        <span class="rating-number">1</span>
+                        <span class="rating-label">Poor</span>
+                    </div>
+                    <div class="rating-item">
+                        <span class="rating-number">2</span>
+                        <span class="rating-label">Fair</span>
+                    </div>
+                    <div class="rating-item">
+                        <span class="rating-number">3</span>
+                        <span class="rating-label">Good</span>
+                    </div>
+                    <div class="rating-item">
+                        <span class="rating-number">4</span>
+                        <span class="rating-label">Very Good</span>
+                    </div>
+                    <div class="rating-item">
+                        <span class="rating-number">5</span>
+                        <span class="rating-label">Excellent</span>
+                    </div>
                 </div>
             </div>
 
@@ -141,26 +184,26 @@ $courses = $stmt->fetchAll();
                 <div class="row">
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Overall Rating</label>
-                        <input type="number" name="rating_overall" min="1" max="5" class="form-control" required>
+                        <input type="number" name="rating_overall" min="1" max="5" class="form-control modern-input" required>
                     </div>
 
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Teaching Rating</label>
-                        <input type="number" name="rating_teaching" min="1" max="5" class="form-control" required>
+                        <input type="number" name="rating_teaching" min="1" max="5" class="form-control modern-input" required>
                     </div>
 
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Materials Rating</label>
-                        <input type="number" name="rating_material" min="1" max="5" class="form-control" required>
+                        <input type="number" name="rating_material" min="1" max="5" class="form-control modern-input" required>
                     </div>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Comments (optional)</label>
-                    <textarea name="comment" rows="3" class="form-control"></textarea>
+                    <textarea name="comment" rows="3" class="form-control modern-input" placeholder="Write your thoughts about this course..."></textarea>
                 </div>
 
-                <button class="btn btn-success">
+                <button class="btn btn-success submit-btn">
                     <i class="bi bi-check-circle"></i> Submit Feedback
                 </button>
             </form>
@@ -180,10 +223,6 @@ $courses = $stmt->fetchAll();
         document.body.classList.toggle('body-shift');
     };
 </script>
-
-
-
-Rewrite this whole code and send it back to me exactly
 
 </body>
 </html>

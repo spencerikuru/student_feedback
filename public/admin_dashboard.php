@@ -58,72 +58,134 @@ $courses = $stmt->fetchAll();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/style.css?v=3">
 </head>
 
-<body class="container mt-5">
+<body>
 
-    <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Welcome, <?php echo htmlspecialchars($_SESSION['name']); ?> (Admin)</h2>
-        <a href="../includes/logout.php" class="btn btn-secondary">Logout</a>
+<!-- =======================
+     SIDEBAR MENU
+======================= -->
+<div id="sidebar" class="sidebar">
+    <div class="sidebar-brand">
+        <div class="sidebar-brand-icon">
+            <i class="bi bi-speedometer2"></i>
+        </div>
+        <div class="sidebar-brand-text">
+            <h3 class="sidebar-title mb-0">Admin</h3>
+            <p class="sidebar-subtitle mb-0">Control Center</p>
+        </div>
+    </div>
+
+    <a href="admin_dashboard.php" class="sidebar-link active">
+        <i class="bi bi-grid"></i><span>Dashboard</span>
+    </a>
+
+    <a href="../includes/logout.php" class="sidebar-link logout">
+        <i class="bi bi-box-arrow-right"></i><span>Logout</span>
+    </a>
+</div>
+
+<!-- Sidebar Toggle Button -->
+<button id="toggle-btn" class="toggle-btn">
+    <i class="bi bi-list"></i>
+</button>
+
+<!-- =======================
+     MAIN CONTENT
+======================= -->
+<div class="container-fluid main-content">
+
+    <div class="dashboard-hero mb-4">
+        <div class="dashboard-hero-content">
+            <div>
+                <span class="hero-badge">Administrator Workspace</span>
+                <h2 class="hero-title mt-3 mb-2">
+                    Welcome, <?php echo htmlspecialchars($_SESSION['name']); ?>
+                </h2>
+                <p class="hero-subtitle mb-0">
+                    Manage courses, update evaluation deadlines, and export feedback records from the platform.
+                </p>
+            </div>
+            <div class="hero-icon">
+                <i class="bi bi-shield-check"></i>
+            </div>
+        </div>
     </div>
 
     <!-- Message -->
     <?php if (!empty($message)): ?>
-        <div class="alert alert-<?php echo $message[1]; ?>">
+        <div class="alert alert-<?php echo $message[1]; ?> modern-alert">
             <?php echo htmlspecialchars($message[0]); ?>
         </div>
     <?php endif; ?>
 
+    <div class="section-head mb-4">
+        <div>
+            <h4 class="mb-1">Administrative Controls</h4>
+            <p class="section-subtext mb-0">Create new courses, manage deadlines, and review current course records.</p>
+        </div>
+        <span class="section-chip">Admin Panel</span>
+    </div>
+
     <!-- Add Course Form -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-primary text-white">
-            <i class="bi bi-plus-circle"></i> Add a New Course
+    <div class="card p-4 mb-4 course-card">
+        <div class="course-card-header mb-3">
+            <div>
+                <h4 class="course-title mb-1">Add a New Course</h4>
+                <p class="course-code mb-0">Create a course record and optionally assign a feedback deadline.</p>
+            </div>
+            <div class="deadline-pill">
+                <i class="bi bi-plus-circle"></i>
+                <span>Course Setup</span>
+            </div>
         </div>
 
-        <div class="card-body">
-            <form method="post">
-                <input type="hidden" name="add_course" value="1">
+        <form method="post">
+            <input type="hidden" name="add_course" value="1">
 
-                <div class="mb-3">
+            <div class="row">
+                <div class="col-md-4 mb-3">
                     <label class="form-label">Course Name</label>
-                    <input type="text" name="course_name" class="form-control" required>
+                    <input type="text" name="course_name" class="form-control modern-input" required>
                 </div>
 
-                <div class="mb-3">
+                <div class="col-md-4 mb-3">
                     <label class="form-label">Course Code</label>
-                    <input type="text" name="course_code" class="form-control">
+                    <input type="text" name="course_code" class="form-control modern-input">
                 </div>
 
-                <!-- NEW: Deadline date picker -->
-                <div class="mb-3">
+                <div class="col-md-4 mb-3">
                     <label class="form-label">Deadline</label>
-                    <input type="date" name="deadline" class="form-control">
+                    <input type="date" name="deadline" class="form-control modern-input">
                 </div>
+            </div>
 
-                <button class="btn btn-success">
-                    <i class="bi bi-check-circle"></i> Add Course
-                </button>
-            </form>
-        </div>
+            <button class="btn btn-success submit-btn">
+                <i class="bi bi-check-circle"></i> Add Course
+            </button>
+        </form>
     </div>
 
     <!-- Existing Courses -->
-    <div class="card shadow-sm">
-        <div class="card-header bg-dark text-white">
-            <i class="bi bi-table"></i> Existing Courses
+    <div class="card p-4 course-card">
+        <div class="course-card-header mb-3">
+            <div>
+                <h4 class="course-title mb-1">Existing Courses</h4>
+                <p class="course-code mb-0">View existing course records and update evaluation deadlines.</p>
+            </div>
+            <div class="deadline-pill">
+                <i class="bi bi-table"></i>
+                <span>Course Records</span>
+            </div>
         </div>
 
-        <div class="card-body">
-
-            <?php if (count($courses) === 0): ?>
-                <p class="text-muted">No courses added yet.</p>
-
-            <?php else: ?>
-
-                <table class="table table-bordered table-striped">
-                    <thead class="table-dark">
+        <?php if (count($courses) === 0): ?>
+            <p class="text-muted">No courses added yet.</p>
+        <?php else: ?>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle modern-table">
+                    <thead>
                         <tr>
                             <th>ID</th>
                             <th>Name</th>
@@ -133,7 +195,6 @@ $courses = $stmt->fetchAll();
                             <th>Actions</th>
                         </tr>
                     </thead>
-
                     <tbody>
                         <?php foreach ($courses as $course): ?>
                         <tr>
@@ -141,41 +202,48 @@ $courses = $stmt->fetchAll();
                             <td><?php echo htmlspecialchars($course['name']); ?></td>
                             <td><?php echo htmlspecialchars($course['code']); ?></td>
                             <td><?php echo $course['created_at']; ?></td>
-
+                            <td><?php echo $course['deadline'] ? $course['deadline'] : '—'; ?></td>
                             <td>
-                                <?php echo $course['deadline'] ? $course['deadline'] : '—'; ?>
-                            </td>
-
-                            <td>
-                                <!-- Update Deadline Form -->
-                                <form method="post" class="d-flex">
+                                <form method="post" class="d-flex flex-wrap gap-2 align-items-center">
                                     <input type="hidden" name="course_id" value="<?php echo $course['id']; ?>">
                                     <input type="hidden" name="update_deadline" value="1">
 
-                                    <input type="date" name="new_deadline"
+                                    <input type="date"
+                                           name="new_deadline"
                                            value="<?php echo $course['deadline']; ?>"
-                                           class="form-control form-control-sm me-2">
+                                           class="form-control form-control-sm modern-input admin-deadline-input">
 
                                     <button class="btn btn-sm btn-primary">
                                         Update
                                     </button>
                                 </form>
                             </td>
-
                         </tr>
                         <?php endforeach; ?>
                     </tbody>
-
                 </table>
+            </div>
+        <?php endif; ?>
 
-            <?php endif; ?>
-
-            <a href="../includes/export_feedback.php" class="btn btn-success mt-3">
+        <div class="mt-4">
+            <a href="../includes/export_feedback.php" class="btn btn-success submit-btn">
                 <i class="bi bi-file-earmark-spreadsheet"></i> Export Feedback to CSV
             </a>
-
         </div>
     </div>
+
+</div>
+
+<!-- Sidebar JS -->
+<script>
+    const sidebar = document.getElementById('sidebar');
+    const toggleBtn = document.getElementById('toggle-btn');
+
+    toggleBtn.onclick = function () {
+        sidebar.classList.toggle('show');
+        document.body.classList.toggle('body-shift');
+    };
+</script>
 
 </body>
 </html>

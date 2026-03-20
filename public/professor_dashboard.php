@@ -58,7 +58,7 @@ foreach ($courses as $c) {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/style.css?v=4">
 </head>
 
 <body>
@@ -67,14 +67,22 @@ foreach ($courses as $c) {
      SIDEBAR MENU
 ======================= -->
 <div id="sidebar" class="sidebar">
-    <h3 class="sidebar-title">Professor</h3>
+    <div class="sidebar-brand">
+        <div class="sidebar-brand-icon">
+            <i class="bi bi-graph-up-arrow"></i>
+        </div>
+        <div class="sidebar-brand-text">
+            <h3 class="sidebar-title mb-0">Professor</h3>
+            <p class="sidebar-subtitle mb-0">Analytics Hub</p>
+        </div>
+    </div>
 
-    <a href="professor_dashboard.php" class="sidebar-link">
-        <i class="bi bi-graph-up"></i> Analytics
+    <a href="professor_dashboard.php" class="sidebar-link active">
+        <i class="bi bi-graph-up"></i><span>Analytics</span>
     </a>
 
     <a href="../includes/logout.php" class="sidebar-link logout">
-        <i class="bi bi-box-arrow-right"></i> Logout
+        <i class="bi bi-box-arrow-right"></i><span>Logout</span>
     </a>
 </div>
 
@@ -86,104 +94,135 @@ foreach ($courses as $c) {
 <!-- =======================
      MAIN CONTENT
 ======================= -->
-<div class="container mt-5">
+<div class="container-fluid main-content">
 
-    <h2 class="mb-4">
-        <i class="bi bi-person-badge text-primary"></i>
-        Welcome, <?php echo htmlspecialchars($_SESSION['name']); ?> (Professor)
-    </h2>
+    <div class="dashboard-hero mb-4">
+        <div class="dashboard-hero-content">
+            <div>
+                <span class="hero-badge">Professor Workspace</span>
+                <h2 class="hero-title mt-3 mb-2">
+                    Welcome, <?php echo htmlspecialchars($_SESSION['name']); ?>
+                </h2>
+                <p class="hero-subtitle mb-0">
+                    Review course ratings, analyze student feedback, and monitor evaluation trends across your assigned courses.
+                </p>
+            </div>
+            <div class="hero-icon">
+                <i class="bi bi-bar-chart-line"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-head mb-4">
+        <div>
+            <h4 class="mb-1">Course Analytics</h4>
+            <p class="section-subtext mb-0">Monitor average ratings and anonymous student comments for each assigned course.</p>
+        </div>
+        <span class="section-chip">Insights Panel</span>
+    </div>
 
     <?php if (empty($courseData)): ?>
-        <div class="alert alert-info">No courses assigned to you yet.</div>
+        <div class="alert alert-info modern-alert">No courses assigned to you yet.</div>
 
     <?php else: ?>
 
         <?php foreach ($courseData as $c): ?>
-            <div class="card shadow-sm mb-5">
+            <div class="card p-4 mb-4 course-card">
 
-                <div class="card-header bg-primary text-white">
-                    <i class="bi bi-book-half"></i>
-                    <?php echo htmlspecialchars($c['name']); ?>
-                </div>
-
-                <div class="card-body">
-
-                    <!-- =====================
-                        AVERAGE RATINGS SUMMARY
-                    ====================== -->
-                    <div class="mb-4 p-3 rounded shadow-sm"
-                        style="background:#f8f9fa; border-left:5px solid #198754;">
-
-                        <div class="fw-bold text-success mb-2">
-                            <i class="bi bi-bar-chart-line"></i> Average Ratings
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-4">
-                                <span class="small fw-bold">Overall:</span>
-                                <span class="badge bg-primary">
-                                    <?php echo round($c['avg_overall'] ?? 0, 2); ?>
-                                </span>
-                            </div>
-
-                            <div class="col-md-4">
-                                <span class="small fw-bold">Teaching:</span>
-                                <span class="badge bg-success">
-                                    <?php echo round($c['avg_teaching'] ?? 0, 2); ?>
-                                </span>
-                            </div>
-
-                            <div class="col-md-4">
-                                <span class="small fw-bold">Materials:</span>
-                                <span class="badge bg-warning text-dark">
-                                    <?php echo round($c['avg_material'] ?? 0, 2); ?>
-                                </span>
-                            </div>
-                        </div>
-
+                <div class="course-card-header mb-3">
+                    <div>
+                        <h4 class="course-title mb-1">
+                            <?php echo htmlspecialchars($c['name']); ?>
+                        </h4>
+                        <p class="course-code mb-0">Course performance summary and student feedback overview.</p>
                     </div>
 
-                    <!-- =====================
-                        CHART DISPLAY
-                    ====================== -->
-                    <h5 class="mb-3">Course Ratings Overview</h5>
+                    <div class="deadline-pill">
+                        <i class="bi bi-bar-chart"></i>
+                        <span>Live Analytics</span>
+                    </div>
+                </div>
+
+                <!-- Average Ratings Summary -->
+                <div class="analytics-summary-box mb-4">
+                    <div class="rating-scale-title mb-3">
+                        <i class="bi bi-speedometer2"></i> Average Ratings
+                    </div>
+
+                    <div class="analytics-grid">
+                        <div class="analytics-metric">
+                            <span class="metric-label">Overall</span>
+                            <span class="metric-badge primary-badge">
+                                <?php echo round($c['avg_overall'] ?? 0, 2); ?>
+                            </span>
+                        </div>
+
+                        <div class="analytics-metric">
+                            <span class="metric-label">Teaching</span>
+                            <span class="metric-badge success-badge">
+                                <?php echo round($c['avg_teaching'] ?? 0, 2); ?>
+                            </span>
+                        </div>
+
+                        <div class="analytics-metric">
+                            <span class="metric-label">Materials</span>
+                            <span class="metric-badge warning-badge">
+                                <?php echo round($c['avg_material'] ?? 0, 2); ?>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Display -->
+                <div class="chart-card mb-4">
+                    <div class="rating-scale-title mb-3">
+                        <i class="bi bi-pie-chart"></i> Course Ratings Overview
+                    </div>
                     <canvas id="chart_<?php echo md5($c['id']); ?>" height="100"></canvas>
+                </div>
 
-                    <script>
-                        new Chart(document.getElementById("chart_<?php echo md5($c['id']); ?>"), {
-                            type: 'bar',
-                            data: {
-                                labels: ['Overall', 'Teaching', 'Materials'],
-                                datasets: [{
-                                    label: 'Average Rating',
-                                    data: [
-                                        <?php echo round($c['avg_overall'] ?? 0, 2); ?>,
-                                        <?php echo round($c['avg_teaching'] ?? 0, 2); ?>,
-                                        <?php echo round($c['avg_material'] ?? 0, 2); ?>
-                                    ],
-                                    backgroundColor: ['#0d6efd','#198754','#ffc107'],
-                                }]
-                            },
-                            options: {
-                                scales: { y: { beginAtZero: true, max: 5 } },
-                                responsive: true,
-                                animation: { duration: 900 }
+                <script>
+                    new Chart(document.getElementById("chart_<?php echo md5($c['id']); ?>"), {
+                        type: 'bar',
+                        data: {
+                            labels: ['Overall', 'Teaching', 'Materials'],
+                            datasets: [{
+                                label: 'Average Rating',
+                                data: [
+                                    <?php echo round($c['avg_overall'] ?? 0, 2); ?>,
+                                    <?php echo round($c['avg_teaching'] ?? 0, 2); ?>,
+                                    <?php echo round($c['avg_material'] ?? 0, 2); ?>
+                                ],
+                                backgroundColor: ['#0d6efd','#16a34a','#f59e0b'],
+                                borderRadius: 10
+                            }]
+                        },
+                        options: {
+                            scales: { y: { beginAtZero: true, max: 5 } },
+                            responsive: true,
+                            animation: { duration: 900 },
+                            plugins: {
+                                legend: {
+                                    display: true
+                                }
                             }
-                        });
-                    </script>
+                        }
+                    });
+                </script>
 
-                    <!-- =====================
-                        COMMENTS SECTION
-                    ====================== -->
-                    <h5 class="mt-4">Student Comments</h5>
+                <!-- Comments Section -->
+                <div class="comments-card">
+                    <div class="rating-scale-title mb-3">
+                        <i class="bi bi-chat-left-text"></i> Student Comments
+                    </div>
 
                     <?php if (empty($c['comments'])): ?>
-                        <div class="alert alert-secondary">
+                        <div class="alert alert-secondary modern-alert mb-0">
                             <i class="bi bi-chat-left-dots"></i> No comments yet.
                         </div>
 
                     <?php else: ?>
-                        <ul class="list-group">
+                        <ul class="list-group comment-list">
                             <?php foreach ($c['comments'] as $comment): ?>
                                 <li class="list-group-item">
                                     <i class="bi bi-chat-quote text-primary me-2"></i>
@@ -192,8 +231,8 @@ foreach ($courses as $c) {
                             <?php endforeach; ?>
                         </ul>
                     <?php endif; ?>
-
                 </div>
+
             </div>
         <?php endforeach; ?>
 
